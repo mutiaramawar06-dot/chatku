@@ -14,3 +14,6 @@ Proyek CPK Praktikum Pemrograman Berbasis Platform: Frontend dan Backend.
 
 ## Penulis
 mutiaramawar06
+## Sumber awal
+Kerangka backend dan skema tabel users awal berasal dari starter praktikum:
+https://github.com/Dzyfhuba/Chat-App-PHP-HTML-Javascript
