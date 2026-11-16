@@ -2,3 +2,4 @@ backend/config.php
 backend/uploads/
 node_modules/
 .DS_Store
+backend/.env
