@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#4f46e5">
+    <meta name="description" content="Aplikasi Pengirim Pesan Sederhana Berbasis Platform (CPK 2, 3, 4, 5, 6)">
+    <title>Aplikasi Pesan Sederhana</title>
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="icons/icon-192.png">
+
+    <!-- Pure Native Modern CSS -->
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div id="app-root">
+        <!-- Toast Notification Container -->
+        <div id="toast-box" class="toast-container" aria-live="polite"></div>
+
+        <!-- ================= AUTHENTICATION SCREEN ================= -->
+        <section id="auth-screen" class="auth-wrapper">
+            <div class="auth-card">
+                <div class="auth-brand">
+                    <div class="brand-logo">💬</div>
+                    <h1 class="brand-title">Simple Chat</h1>
+                    <p class="brand-subtitle">Praktikum Pemrograman Berbasis Platform</p>
+                </div>
+
+                <!-- Auth Navigation Tabs -->
+                <div class="tab-buttons">
+                    <button id="tab-login-btn" class="tab-btn active" type="button">Masuk (Login)</button>
+                    <button id="tab-register-btn" class="tab-btn" type="button">Daftar Akun</button>
+                </div>
+
+                <div id="auth-alert" class="alert hidden" role="alert"></div>
+
+                <!-- Form Login (FR-02) -->
+                <form id="login-form" class="auth-form" novalidate>
+                    <div class="form-group">
+                        <label for="login-phone">Nomor HP</label>
+                        <input type="tel" id="login-phone" name="phone" placeholder="Contoh: 081234567890" required autocomplete="tel">
+                        <span class="field-hint">Hanya digit angka, minimal 8 digit</span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="login-password">Password</label>
+                        <input type="password" id="login-password" name="password" placeholder="Masukkan password" required autocomplete="current-password">
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-block">Masuk ke Aplikasi</button>
+                </form>
+
+                <!-- Form Registrasi (FR-01, FR-13, FR-14, FR-15) -->
+                <form id="register-form" class="auth-form hidden" novalidate enctype="multipart/form-data">
+                    <div class="form-group">
+                        <label for="reg-name">Nama Lengkap</label>
+                        <input type="text" id="reg-name" name="name" placeholder="Nama Anda (tanpa angka)" required autocomplete="name">
+                        <span class="field-hint">Minimal 2 karakter, tidak boleh memuat angka</span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="reg-phone">Nomor HP</label>
+                        <input type="tel" id="reg-phone" name="phone" placeholder="Contoh: 081234567890" required autocomplete="tel">
+                        <span class="field-hint">Nomor unik, hanya digit angka</span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="reg-password">Password</label>
+                        <input type="password" id="reg-password" name="password" placeholder="Minimal 6 karakter" required autocomplete="new-password">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="reg-photo">Foto Profil (Opsional)</label>
+                        <input type="file" id="reg-photo" name="photo" accept="image/jpeg,image/png,image/webp">
+                        <span class="field-hint">Format JPG/PNG/WEBP, maksimal 2 MB</span>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-block">Daftar Sekarang</button>
+                </form>
+            </div>
+        </section>
+
+        <!-- ================= MAIN APP SCREEN ================= -->
+        <main id="main-screen" class="main-layout hidden">
+            <!-- Sidebar Panel (Chats / Contacts / Profile) -->
+            <aside class="sidebar">
+                <header class="sidebar-header">
+                    <div class="sidebar-brand">
+                        <span class="brand-icon">💬</span>
+                        <h2 class="brand-text">Simple Chat</h2>
+                    </div>
+                    <nav class="sidebar-nav">
+                        <button id="nav-chats-btn" class="nav-tab-btn active" title="Percakapan">
+                            <span>💬</span>
+                            <span class="nav-label">Chat</span>
+                        </button>
+                        <button id="nav-contacts-btn" class="nav-tab-btn" title="Kontak">
+                            <span>👥</span>
+                            <span class="nav-label">Kontak</span>
+                        </button>
+                        <button id="nav-profile-btn" class="nav-tab-btn" title="Profil">
+                            <span>⚙️</span>
+                            <span class="nav-label">Profil</span>
+                        </button>
+                    </nav>
+                </header>
+
+                <div class="sidebar-content">
+                    <!-- Panel Percakapan (FR-10, FR-23 Eager Loading) -->
+                    <div id="panel-chats" class="sidebar-panel">
+                        <div class="panel-header">
+                            <h3>Percakapan</h3>
+                        </div>
+                        <div id="conversations-list" class="list-container" role="list">
+                            <!-- Populated dynamically via chat.js -->
+                        </div>
+                    </div>
+
+                    <!-- Panel Kontak (FR-06, FR-07) -->
+                    <div id="panel-contacts" class="sidebar-panel hidden">
+                        <div class="panel-header flex-between">
+                            <h3>Daftar Kontak</h3>
+                            <button id="open-add-contact-btn" class="btn btn-sm btn-primary" type="button">+ Tambah</button>
+                        </div>
+                        <div id="contacts-list" class="list-container" role="list">
+                            <!-- Populated dynamically via contacts.js -->
+                        </div>
+                    </div>
+
+                    <!-- Panel Profil & Akun (FR-03, FR-04, FR-29) -->
+                    <div id="panel-profile" class="sidebar-panel hidden">
+                        <div class="panel-header">
+                            <h3>Profil Akun</h3>
+                        </div>
+                        <div class="profile-card">
+                            <div class="profile-avatar-wrap">
+                                <img id="profile-avatar" class="profile-avatar-img" alt="Foto Profil" src="">
+                            </div>
+                            <h3 id="profile-name" class="profile-name"></h3>
+                            <p id="profile-phone" class="profile-phone"></p>
+                            <p class="profile-meta">ID Pengguna: <span id="profile-id" class="code-badge"></span></p>
+
+                            <div class="profile-actions">
+                                <button id="enable-notification-btn" class="btn btn-secondary btn-block" type="button">
+                                    🔔 Aktifkan Notifikasi Remote
+                                </button>
+                                <button id="logout-btn" class="btn btn-outline btn-block" type="button">
+                                    🚪 Logout
+                                </button>
+                                <button id="delete-account-btn" class="btn btn-danger btn-block" type="button">
+                                    🗑️ Hapus Akun Permanen
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Chat Area View (FR-08, FR-09, FR-11) -->
+            <section id="chat-area" class="chat-area">
+                <!-- Empty Placeholder -->
+                <div id="empty-chat-placeholder" class="empty-chat-state">
+                    <div class="empty-icon">✉️</div>
+                    <h2>Mulai Kirim Pesan</h2>
+                    <p>Pilih salah satu percakapan di sebelah kiri atau hubungi kontak Anda untuk memulai obrolan baru.</p>
+                </div>
+
+                <!-- Active Chat View -->
+                <div id="active-chat-view" class="active-chat-container hidden">
+                    <!-- Chat Header -->
+                    <header class="chat-header">
+                        <button id="chat-back-btn" class="btn-icon mobile-only" title="Kembali">←</button>
+                        <div class="chat-partner-avatar-wrap">
+                            <img id="chat-partner-avatar" class="partner-avatar" alt="Partner Avatar" src="">
+                        </div>
+                        <div class="chat-partner-info">
+                            <h3 id="chat-partner-name" class="partner-name"></h3>
+                            <span id="chat-partner-phone" class="partner-phone"></span>
+                        </div>
+                    </header>
+
+                    <!-- Message Bubble History Container -->
+                    <div id="messages-container" class="messages-container">
+                        <!-- Populated dynamically via chat.js -->
+                    </div>
+
+                    <!-- Image Preview Prior to Send -->
+                    <div id="image-preview-box" class="image-preview-box hidden">
+                        <img id="image-preview-img" alt="Pratinjau Gambar" src="">
+                        <button id="remove-image-btn" class="btn-remove-preview" title="Hapus Gambar" type="button">✕</button>
+                    </div>
+
+                    <!-- Chat Input Form -->
+                    <form id="chat-form" class="chat-input-bar">
+                        <label for="image-input" class="btn-attach" title="Lampirkan Gambar (Maks 2MB)">
+                            📷
+                            <input type="file" id="image-input" accept="image/jpeg,image/png,image/webp" class="visually-hidden">
+                        </label>
+                        <input type="text" id="message-input" placeholder="Ketik pesan..." autocomplete="off">
+                        <button type="submit" class="btn btn-primary btn-send" title="Kirim">
+                            <span>Kirim</span> ➤
+                        </button>
+                    </form>
+                </div>
+            </section>
+        </main>
+
+        <!-- ================= CONTACT MODAL ================= -->
+        <div id="contact-modal" class="modal-overlay hidden" role="dialog" aria-modal="true">
+            <div class="modal-box">
+                <div class="modal-header">
+                    <h3 id="contact-modal-title">Tambah Kontak</h3>
+                    <button id="close-contact-modal-btn" class="btn-close" type="button">✕</button>
+                </div>
+                <div id="contact-modal-alert" class="alert hidden"></div>
+                <form id="contact-form">
+                    <input type="hidden" id="contact-modal-id">
+                    <div class="form-group">
+                        <label for="contact-modal-phone">Nomor HP Pengguna</label>
+                        <input type="tel" id="contact-modal-phone" placeholder="Contoh: 081234567890" required>
+                        <span class="field-hint">Nomor wajib terdaftar di sistem Simple Chat</span>
+                    </div>
+                    <div class="form-group">
+                        <label for="contact-modal-alias">Nama Alias (Opsional)</label>
+                        <input type="text" id="contact-modal-alias" placeholder="Contoh: Teman Sekelas (tanpa angka)">
+                        <span class="field-hint">Nama panggilan lokal, tidak boleh ada angka</span>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-primary">Simpan Kontak</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Native ES Modules -->
+    <script type="module" src="js/app.js"></script>
+</body>
+</html>
