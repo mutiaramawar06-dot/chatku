@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 $uri = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/';
 
-// Safely serve uploaded media in development
-if (str_starts_with($uri, '/uploads/')) {
+// Safely serve uploaded media in development (/uploads/ or /storage/)
+if (str_starts_with($uri, '/uploads/') || str_starts_with($uri, '/storage/')) {
     $filePath = __DIR__ . str_replace(['../', '..\\'], '', $uri);
     if (is_file($filePath)) {
         $finfo = finfo_open(FILEINFO_MIME_TYPE);

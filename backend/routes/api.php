@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use Controllers\AuthController;
+use Controllers\ChatController;
 use Controllers\ContactController;
 use Controllers\MessageController;
 use Lib\DB;
@@ -48,6 +49,9 @@ return static function (Router $router): void {
     $router->get('/api/conversations', [MessageController::class, 'conversations']);
     $router->get('/api/messages/{userId}', [MessageController::class, 'history']);
     $router->post('/api/messages', [MessageController::class, 'store']);
+
+    // Direct Image Upload Endpoint (ChatController)
+    $router->post('/api/chat/image', [ChatController::class, 'uploadImage']);
 
     // Device Token for FCM Push Notification (Kriteria 6)
     $router->post('/api/device-token', [MessageController::class, 'saveDeviceToken']);

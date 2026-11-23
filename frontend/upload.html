@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload Image Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 2rem;
+            max-width: 600px;
+            margin: auto;
+        }
+        .container {
+            border: 1px solid #ccc;
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        button {
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            background-color: #4f46e5;
+            color: white;
+            border: none;
+            border-radius: 4px;
+        }
+        #resultBox {
+            margin-top: 1rem;
+            padding: 1rem;
+            background: #f1f5f9;
+            border-radius: 4px;
+            display: none;
+        }
+        #previewImg {
+            max-width: 100%;
+            max-height: 300px;
+            display: block;
+            margin-top: 0.5rem;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Uji Upload Gambar ke Database</h2>
+        <p>Pilih file gambar untuk dikirim ke endpoint <code>/api/chat/image</code>:</p>
+        <div style="margin-bottom: 1rem;">
+            <input type="file" id="fileInput" accept=".jpg, .jpeg, .png, .gif, .webp">
+            <button id="uploadButton" type="button">Upload</button>
+        </div>
+
+        <div id="resultBox">
+            <h4>Hasil Upload:</h4>
+            <pre id="resultJson"></pre>
+            <img id="previewImg" src="" alt="Pratinjau Hasil Upload">
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const fileInput = document.getElementById('fileInput');
+            const uploadButton = document.getElementById('uploadButton');
+            const resultBox = document.getElementById('resultBox');
+            const resultJson = document.getElementById('resultJson');
+            const previewImg = document.getElementById('previewImg');
+
+            uploadButton.addEventListener('click', function() {
+                const file = fileInput.files[0];
+                if (!file) {
+                    alert('Please select a file to upload.');
+                    return;
+                }
+
+                const formData = new FormData();
+                formData.append('image', file);
+
+                // Auto-detect backend port (8000, 9000, or current host)
+                let backendUrl = 'http://localhost:8000/api/chat/image';
+                if (window.location.port === '9000') {
+                    backendUrl = 'http://localhost:9000/api/chat/image';
+                } else if (window.location.port === '8000') {
+                    backendUrl = '/api/chat/image';
+                }
+
+                uploadButton.disabled = true;
+                uploadButton.textContent = 'Uploading...';
+
+                fetch(backendUrl, {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => {
+                    if (!response.ok && backendUrl !== 'http://localhost:9000/api/chat/image' && window.location.port !== '8000') {
+                        // Retry with 9000 if 8000 is not reachable
+                        return fetch('http://localhost:9000/api/chat/image', {
+                            method: 'POST',
+                            body: formData
+                        });
+                    }
+                    return response;
+                })
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Success:', data);
+                    resultBox.style.display = 'block';
+                    resultJson.textContent = JSON.stringify(data, null, 2);
+
+                    const imgPath = data?.data?.image || data?.image;
+                    if (imgPath) {
+                        const host = window.location.port === '9000' ? 'http://localhost:9000' : 'http://localhost:8000';
+                        previewImg.src = imgPath.startsWith('http') ? imgPath : (host + imgPath);
+                        previewImg.style.display = 'block';
+                    }
+                })
+                .catch((error) => {
+                    console.error('Error:', error);
+                    resultBox.style.display = 'block';
+                    resultJson.textContent = 'Upload Error: ' + error.message;
+                })
+                .finally(() => {
+                    uploadButton.disabled = false;
+                    uploadButton.textContent = 'Upload';
+                });
+            });
+        });
+    </script>
+</body>
+</html>

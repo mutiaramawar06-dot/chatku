@@ -1,11 +1,37 @@
 -- MariaDB / MySQL Database Dump for Simple Chat App (CPK 2, 3, 4, 5, 6)
--- Generated: 2026-11-17 09:59:50
+-- Generated: 2026-11-23 12:54:18
 -- Host: 127.0.0.1   Database: chat-app
 -- ------------------------------------------------------
 
 SET FOREIGN_KEY_CHECKS = 0;
 SET SQL_MODE = 'NO_AUTO_VALUE_ON_ZERO';
 SET time_zone = '+00:00';
+
+--
+-- Table structure for table `chats`
+--
+
+DROP TABLE IF EXISTS `chats`;
+CREATE TABLE `chats` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `reference` varchar(255) DEFAULT NULL,
+  `user_id` bigint(20) DEFAULT NULL,
+  `message` text DEFAULT NULL,
+  `image` varchar(50) DEFAULT NULL,
+  `file` varchar(50) DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT current_timestamp(),
+  `update_at` timestamp NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  `deleted_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
+
+--
+-- Dumping data for table `chats`
+--
+
+LOCK TABLES `chats` WRITE;
+INSERT INTO `chats` (`id`, `reference`, `user_id`, `message`, `image`, `file`, `created_at`, `update_at`, `deleted_at`) VALUES ('1', '1795438761', NULL, NULL, 'test_sample.png', NULL, '2026-11-23 19:52:59', '2026-11-23 19:52:59', NULL);
+UNLOCK TABLES;
 
 --
 -- Table structure for table `users`
