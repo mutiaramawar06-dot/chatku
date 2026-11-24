@@ -18,3 +18,7 @@ yarn-error.log*
 Thumbs.db
 .vscode/
 .idea/
+
+# Local storage and uploaded test images
+backend/storage/*
+!backend/storage/.gitkeep
