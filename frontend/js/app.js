@@ -2,7 +2,7 @@
  * Main Application Orchestrator (Pure Vanilla JS ES Modules)
  */
 
-import { ApiClient } from './api.js';
+import { ApiClient, resolveImageUrl } from './api.js';
 import { AuthService } from './auth.js';
 import { ContactsService } from './contacts.js';
 import { ChatService } from './chat.js';
@@ -59,8 +59,11 @@ class App {
         this.imageInput = document.getElementById('image-input');
         this.imagePreviewBox = document.getElementById('image-preview-box');
         this.imagePreviewImg = document.getElementById('image-preview-img');
+        this.imagePreviewName = document.getElementById('image-preview-name');
         this.removeImageBtn = document.getElementById('remove-image-btn');
         this.chatBackBtn = document.getElementById('chat-back-btn');
+        this.tabAccountBadge = document.getElementById('tab-account-badge');
+        this.switchTabBtn = document.getElementById('switch-tab-btn');
 
         // Modals
         this.contactModal = document.getElementById('contact-modal');
@@ -142,6 +145,12 @@ class App {
         // Profile Actions
         this.logoutBtn.onclick = () => this.handleLogout();
         this.deleteAccountBtn.onclick = () => this.handleDeleteAccount();
+        if (this.tabAccountBadge) {
+            this.tabAccountBadge.onclick = () => this.handleLogoutTabOnly();
+        }
+        if (this.switchTabBtn) {
+            this.switchTabBtn.onclick = () => this.handleLogoutTabOnly();
+        }
         if (this.enableNotificationBtn) {
             this.enableNotificationBtn.onclick = async () => {
                 const ok = await FcmService.requestPermissionAndRegister();
@@ -310,6 +319,14 @@ class App {
         }
     }
 
+    handleLogoutTabOnly() {
+        ApiClient.clearTabAuth();
+        this.currentUser = null;
+        this.activePartner = null;
+        this.showAuthScreen('login');
+        this.showToast('Akun di tab ini berhasil keluar. Anda bisa login dengan akun lain di tab ini.', 'info');
+    }
+
     async handleDeleteAccount() {
         if (confirm('PERINGATAN: Apakah Anda yakin ingin menghapus akun ini secara permanen? Semua pesan dan kontak akan dihapus.')) {
             try {
@@ -330,7 +347,7 @@ class App {
         this.profileId.textContent = this.currentUser.id;
 
         if (this.currentUser.photo_path) {
-            this.profileAvatar.src = this.currentUser.photo_path;
+            this.profileAvatar.src = resolveImageUrl(this.currentUser.photo_path);
         } else {
             this.profileAvatar.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="60" height="60"%3E%3Ccircle cx="30" cy="30" r="30" fill="%234f46e5"/%3E%3Ctext x="50%25" y="55%25" text-anchor="middle" fill="white" font-size="24"%3E' + (this.currentUser.name || 'U').charAt(0).toUpperCase() + '%3C/text%3E%3C/svg%3E';
         }
@@ -385,7 +402,7 @@ class App {
         this.chatPartnerName.textContent = displayName;
         this.chatPartnerPhone.textContent = phone;
         if (photoPath) {
-            this.chatPartnerAvatar.src = photoPath;
+            this.chatPartnerAvatar.src = resolveImageUrl(photoPath);
         } else {
             this.chatPartnerAvatar.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="40" height="40"%3E%3Ccircle cx="20" cy="20" r="20" fill="%236366f1"/%3E%3Ctext x="50%25" y="55%25" text-anchor="middle" fill="white" font-size="16"%3E' + (displayName || 'U').charAt(0).toUpperCase() + '%3C/text%3E%3C/svg%3E';
         }
@@ -430,6 +447,15 @@ class App {
         // If new messages arrived, re-render and scroll
         if (newCount !== currentCount) {
             this.renderMessages(history.messages || []);
+            // Play notification sound and show desktop notification for incoming message (FR-29)
+            const lastMsg = (history.messages || [])[newCount - 1];
+            if (lastMsg && lastMsg.sender_id !== this.currentUser.id) {
+                FcmService.playNotificationSound();
+                const preview = lastMsg.body || (lastMsg.image_path ? '📷 [Foto]' : 'Pesan baru diterima');
+                FcmService.showLocalNotification('Pesan baru dari ' + (this.activePartner?.name || 'Seseorang'), {
+                    body: preview,
+                });
+            }
         }
     }
 
@@ -450,7 +476,11 @@ class App {
         const reader = new FileReader();
         reader.onload = (event) => {
             this.imagePreviewImg.src = event.target.result;
+            if (this.imagePreviewName) {
+                this.imagePreviewName.textContent = file.name;
+            }
             this.imagePreviewBox.classList.remove('hidden');
+            this.showToast('Foto dipilih! Klik tombol Kirim ➤ untuk mengirim foto ke ' + (this.activePartner?.name || 'chat'), 'info');
         };
         reader.readAsDataURL(file);
     }
@@ -458,6 +488,9 @@ class App {
     clearSelectedImage() {
         this.imageInput.value = '';
         this.imagePreviewImg.src = '';
+        if (this.imagePreviewName) {
+            this.imagePreviewName.textContent = '';
+        }
         this.imagePreviewBox.classList.add('hidden');
     }
 

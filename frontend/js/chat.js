@@ -3,7 +3,7 @@
  * Handles conversation rendering, polling updates, and secure XSS-safe message bubble generation.
  */
 
-import { ApiClient } from './api.js';
+import { ApiClient, resolveImageUrl } from './api.js';
 import { observeLazyImages } from './lazy.js';
 
 export class ChatService {
@@ -40,7 +40,7 @@ export class ChatService {
     /**
      * Start background polling for conversation and active chat updates (FR-11).
      */
-    static startPolling(onConversationsUpdate, onActiveChatUpdate, intervalMs = 3000) {
+    static startPolling(onConversationsUpdate, onActiveChatUpdate, intervalMs = 2500) {
         this.stopPolling();
         this.pollingInterval = setInterval(async () => {
             try {
@@ -54,7 +54,7 @@ export class ChatService {
                     onActiveChatUpdate(history);
                 }
             } catch (err) {
-                // Ignore transient polling network drops
+                // Ignore transient polling drops
             }
         }, intervalMs);
     }
@@ -91,7 +91,8 @@ export class ChatService {
             const img = document.createElement('img');
             img.className = 'conv-avatar-img';
             img.alt = conv.display_name;
-            img.setAttribute('data-src', conv.photo_path);
+            const avatarUrl = resolveImageUrl(conv.photo_path);
+            img.setAttribute('data-src', avatarUrl);
             img.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="44" height="44"%3E%3Crect width="100%25" height="100%25" fill="%23e2e8f0"/%3E%3C/svg%3E';
             avatarBox.appendChild(img);
         } else {
@@ -167,12 +168,13 @@ export class ChatService {
             const imgBox = document.createElement('div');
             imgBox.className = 'message-image-box';
 
+            const fullImageUrl = resolveImageUrl(msg.image_path);
             const img = document.createElement('img');
             img.className = 'message-img';
             img.alt = 'Lampiran Gambar';
-            img.setAttribute('data-src', msg.image_path);
-            img.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="200" height="150"%3E%3Crect width="100%25" height="100%25" fill="%23cbd5e1"/%3E%3C/svg%3E';
-            img.onclick = () => window.open(msg.image_path, '_blank');
+            img.setAttribute('data-src', fullImageUrl);
+            img.src = fullImageUrl;
+            img.onclick = () => window.open(fullImageUrl, '_blank');
 
             imgBox.appendChild(img);
             bubble.appendChild(imgBox);

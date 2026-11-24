@@ -1,27 +1,40 @@
 /**
  * API Client Module (Native ES Module)
  * Handles client-server communications via fetch with Bearer token authentication (FR-04, FR-17).
+ * Supports per-tab session isolation via sessionStorage (allows testing 2 different users in 2 tabs simultaneously).
  */
 
 const API_BASE_URL = window.location.port === '8000' 
     ? '' 
     : 'http://localhost:8000';
 
+export function resolveImageUrl(path) {
+    if (!path) return '';
+    if (path.startsWith('http://') || path.startsWith('https://') || path.startsWith('data:')) {
+        return path;
+    }
+    const backendHost = window.location.port === '8000' ? '' : 'http://localhost:8000';
+    return `${backendHost}${path}`;
+}
+
 export class ApiClient {
     static getToken() {
-        return localStorage.getItem('chat_token');
+        // Prefer sessionStorage so each tab can log in as a different user
+        return sessionStorage.getItem('chat_token') || localStorage.getItem('chat_token');
     }
 
     static setToken(token) {
         if (token) {
+            sessionStorage.setItem('chat_token', token);
             localStorage.setItem('chat_token', token);
         } else {
+            sessionStorage.removeItem('chat_token');
             localStorage.removeItem('chat_token');
         }
     }
 
     static getUser() {
-        const raw = localStorage.getItem('chat_user');
+        const raw = sessionStorage.getItem('chat_user') || localStorage.getItem('chat_user');
         try {
             return raw ? JSON.parse(raw) : null;
         } catch {
@@ -31,15 +44,24 @@ export class ApiClient {
 
     static setUser(user) {
         if (user) {
+            sessionStorage.setItem('chat_user', JSON.stringify(user));
             localStorage.setItem('chat_user', JSON.stringify(user));
         } else {
+            sessionStorage.removeItem('chat_user');
             localStorage.removeItem('chat_user');
         }
     }
 
     static clearAuth() {
+        sessionStorage.removeItem('chat_token');
+        sessionStorage.removeItem('chat_user');
         localStorage.removeItem('chat_token');
         localStorage.removeItem('chat_user');
+    }
+
+    static clearTabAuth() {
+        sessionStorage.removeItem('chat_token');
+        sessionStorage.removeItem('chat_user');
     }
 
     static async request(path, options = {}) {

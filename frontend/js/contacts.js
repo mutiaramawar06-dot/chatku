@@ -3,7 +3,7 @@
  * Strict XSS prevention by utilizing textContent for all user-provided data.
  */
 
-import { ApiClient } from './api.js';
+import { ApiClient, resolveImageUrl } from './api.js';
 import { observeLazyImages } from './lazy.js';
 
 export class ContactsService {
@@ -47,8 +47,8 @@ export class ContactsService {
             const img = document.createElement('img');
             img.className = 'contact-avatar-img';
             img.alt = contact.alias_name;
-            // Lazy loading: use data-src (FR-24)
-            img.setAttribute('data-src', contact.photo_path);
+            const fullAvatar = resolveImageUrl(contact.photo_path);
+            img.setAttribute('data-src', fullAvatar);
             img.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="40" height="40"%3E%3Crect width="100%25" height="100%25" fill="%23e2e8f0"/%3E%3C/svg%3E';
             avatarBox.appendChild(img);
         } else {

@@ -195,7 +195,7 @@ describe('3. Contact List Rendering & XSS Protection (FR-16, FR-24)', () => {
         // Check lazy loading data-src attribute (FR-24)
         const imgEl = element.querySelector('img.contact-avatar-img');
         expect(imgEl).not.toBeNull();
-        expect(imgEl.getAttribute('data-src')).toBe('/uploads/profiles/test.jpg');
+        expect(imgEl.getAttribute('data-src')).toContain('/uploads/profiles/test.jpg');
 
         // Check action button clicks
         const deleteBtn = element.querySelector('.contact-actions .text-danger');
@@ -222,7 +222,7 @@ describe('3. Contact List Rendering & XSS Protection (FR-16, FR-24)', () => {
         expect(bubbleWrap.querySelectorAll('b').length).toBe(0);
 
         const imgEl = bubbleWrap.querySelector('img.message-img');
-        expect(imgEl.getAttribute('data-src')).toBe('/uploads/messages/photo.png');
+        expect(imgEl.getAttribute('data-src')).toContain('/uploads/messages/photo.png');
 
         const statusEl = bubbleWrap.querySelector('.message-status');
         expect(statusEl.textContent).toBe('✓✓');

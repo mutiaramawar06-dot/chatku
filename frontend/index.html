@@ -90,6 +90,9 @@
                     <div class="sidebar-brand">
                         <span class="brand-icon">💬</span>
                         <h2 class="brand-text">Simple Chat</h2>
+                        <button id="tab-account-badge" class="badge-tab-account" type="button" title="Ganti akun untuk tab browser ini">
+                            👤 Akun Baru (Tab Ini)
+                        </button>
                     </div>
                     <nav class="sidebar-nav">
                         <button id="nav-chats-btn" class="nav-tab-btn active" title="Percakapan">
@@ -143,6 +146,9 @@
                             <p class="profile-meta">ID Pengguna: <span id="profile-id" class="code-badge"></span></p>
 
                             <div class="profile-actions">
+                                <button id="switch-tab-btn" class="btn btn-secondary btn-block" type="button">
+                                    🔄 Login Akun Lain (Tab Ini Saja)
+                                </button>
                                 <button id="enable-notification-btn" class="btn btn-secondary btn-block" type="button">
                                     🔔 Aktifkan Notifikasi Remote
                                 </button>
@@ -188,18 +194,24 @@
 
                     <!-- Image Preview Prior to Send -->
                     <div id="image-preview-box" class="image-preview-box hidden">
-                        <img id="image-preview-img" alt="Pratinjau Gambar" src="">
-                        <button id="remove-image-btn" class="btn-remove-preview" title="Hapus Gambar" type="button">✕</button>
+                        <div class="image-preview-info">
+                            <img id="image-preview-img" alt="Pratinjau Gambar" src="">
+                            <div class="image-preview-text">
+                                <span id="image-preview-name" class="preview-filename"></span>
+                                <span class="preview-hint">Gambar siap dikirim ke lawan bicara. Klik tombol Kirim ➤</span>
+                            </div>
+                        </div>
+                        <button id="remove-image-btn" class="btn-remove-preview" title="Hapus Gambar" type="button">✕ Batal</button>
                     </div>
 
                     <!-- Chat Input Form -->
                     <form id="chat-form" class="chat-input-bar">
-                        <label for="image-input" class="btn-attach" title="Lampirkan Gambar (Maks 2MB)">
-                            📷
-                            <input type="file" id="image-input" accept="image/jpeg,image/png,image/webp" class="visually-hidden">
+                        <label for="image-input" class="btn-attach" title="Pilih foto untuk dikirim ke chat">
+                            📷 <span class="attach-label">Kirim Foto</span>
+                            <input type="file" id="image-input" accept="image/jpeg,image/png,image/webp,image/gif" class="visually-hidden">
                         </label>
-                        <input type="text" id="message-input" placeholder="Ketik pesan..." autocomplete="off">
-                        <button type="submit" class="btn btn-primary btn-send" title="Kirim">
+                        <input type="text" id="message-input" placeholder="Ketik pesan atau lampirkan foto..." autocomplete="off">
+                        <button type="submit" class="btn btn-primary btn-send" title="Kirim Pesan/Foto">
                             <span>Kirim</span> ➤
                         </button>
                     </form>

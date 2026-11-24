@@ -93,6 +93,22 @@ class MessageController
             imagePath: $imagePath
         );
 
+        // Also sync to chats table so it appears in HeidiSQL chats table
+        try {
+            $db = \Lib\DB::getInstance();
+            $chatStmt = $db->prepare(
+                'INSERT INTO chats (reference, message, image, created_at)
+                 VALUES (:reference, :message, :image, CURRENT_TIMESTAMP)'
+            );
+            $chatStmt->execute([
+                ':reference' => (string) (time() + rand(1, 1000)),
+                ':message' => $body !== '' ? $body : null,
+                ':image' => $imagePath ? basename($imagePath) : null,
+            ]);
+        } catch (\Throwable $e) {
+            // Ignore if chats table structure differs
+        }
+
         // Remote push notification trigger (FR-29)
         $previewText = $body !== '' ? $body : '[Foto]';
         NotificationService::notifyNewMessage($receiver['id'], $currentUser['name'], $previewText);
